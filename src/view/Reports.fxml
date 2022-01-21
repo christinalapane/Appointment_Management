@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="736.0" prefWidth="859.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Reports">
+   <children>
+      <Label fx:id="contactLabel" layoutX="339.0" prefHeight="42.0" prefWidth="292.0">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <ComboBox fx:id="selectContact" layoutX="30.0" layoutY="14.0" onAction="#onSelectContact" prefWidth="150.0" promptText="Select Contact" />
+      <TableView fx:id="appointmentTable" layoutX="30.0" layoutY="65.0" prefHeight="278.0" prefWidth="798.0">
+        <columns>
+          <TableColumn fx:id="appointmentIDCol" prefWidth="98.0" text="Appointment ID" />
+          <TableColumn fx:id="titleCol" prefWidth="106.0" text="Title" />
+            <TableColumn fx:id="typeCol" prefWidth="106.0" text="Type" />
+            <TableColumn fx:id="descriptionCol" prefWidth="128.0" text="Description" />
+            <TableColumn fx:id="startCol" prefWidth="116.0" text="Start" />
+            <TableColumn fx:id="endCol" prefWidth="134.0" text="End" />
+            <TableColumn fx:id="customerIDCol" prefWidth="109.0" text="Customer ID" />
+        </columns>
+      </TableView>
+      <TableView fx:id="monthTable" layoutX="30.0" layoutY="392.0" prefHeight="290.0" prefWidth="378.0">
+        <columns>
+          <TableColumn fx:id="monthTypeCol" prefWidth="122.0" text="Type " />
+          <TableColumn fx:id="monthCol" prefWidth="151.0" text="Month" />
+            <TableColumn fx:id="totalMonthCol" prefWidth="104.0" text="Total" />
+        </columns>
+      </TableView>
+      <TableView fx:id="yearTable" layoutX="430.0" layoutY="392.0" prefHeight="290.0" prefWidth="378.0">
+         <columns>
+            <TableColumn fx:id="contactCol" prefWidth="143.0" text="Contact" />
+            <TableColumn fx:id="yearCol" prefWidth="109.0" text="Year" />
+            <TableColumn fx:id="totalYearCol" prefWidth="144.0" text="Total" />
+         </columns>
+      </TableView>
+      <Label layoutX="82.0" layoutY="356.0" text="Appointments by Type and Month">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="487.0" layoutY="357.0" text="Appointments by Contact and Year">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Button fx:id="mainScreenButton" layoutX="644.0" layoutY="697.0" mnemonicParsing="false" onAction="#onMainScreen" prefHeight="26.0" prefWidth="87.0" text="Main Screen" />
+      <Button fx:id="exitButton" layoutX="743.0" layoutY="696.0" mnemonicParsing="false" onAction="#onExitButton" text="Exit Program" />
+   </children>
+</AnchorPane>
