@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
  */
 public class Logger {
 
-    private static final String loginPath = "LoginInfo.txt";
+    private static final String loginPath = "login_activity.txt";
 
 
     public static void auditLogin(String userName, Boolean successBool) throws IOException {

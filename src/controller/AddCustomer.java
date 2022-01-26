@@ -39,14 +39,11 @@ public class AddCustomer implements Initializable {
     @FXML private Button saveButton;
 
 
-    /**
-     * country and division array lists
-     */
+    /*** countries list*/
     private final ObservableList<Countries> countries = FXCollections.observableArrayList();
+    /*** divisions list*/
     private final ObservableList<FirstLevel> divisions = FXCollections.observableArrayList();
-    /**
-     * to allow a new customer
-     */
+    /*** to allow a new customer*/
     private Customer customer = null;
     private Consumer<Customer> onComplete;
 
@@ -158,14 +155,10 @@ public class AddCustomer implements Initializable {
 
 
     }
-    /**
-     * When country is chosen, will update stateCombo to filtered divisions
-     */
+    /*** When country is chosen, will update stateCombo to filtered divisions*/
     @FXML void onCountry()  {updateDivision();}
 
-    /**
-     * confirm alert that customer has been added
-     */
+    /*** confirm alert that customer has been added*/
     private void confirmAlert() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirm");
@@ -174,9 +167,7 @@ public class AddCustomer implements Initializable {
         alert.showAndWait();
     }
 
-    /**
-     * error alert if customer was not added to database
-     */
+    /*** error alert if customer was not added to database*/
     private void errorAlert() {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -186,9 +177,7 @@ public class AddCustomer implements Initializable {
 
     }
 
-    /**
-     * unused
-     */
+    /*** unused*/
     @FXML void onStateCombo(){}
 
 }

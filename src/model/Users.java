@@ -4,7 +4,7 @@ package model;
  * All variables for users table
  */
 public class Users {
-    public int userID;
+    public  int userID;
     public String username;
     public String password;
 
@@ -30,7 +30,7 @@ public class Users {
     /**
      * Set and get all variables for user table
      */
-    public int getUserID(){return userID;}
+    public  int getUserID(){return userID;}
     public void setUserID(int userID){this.userID = userID;}
 
     public  String getUsername(){return username;}

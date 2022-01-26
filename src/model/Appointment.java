@@ -22,7 +22,6 @@ public class Appointment {
    private  String contactName;
    private  int userID;
    private  String username;
-   private String division;
 
 
    /**
@@ -46,7 +45,7 @@ public class Appointment {
     * @param username User_Name
     */
    public Appointment(int appointmentID, String title, String description, String location, String type, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime created, String createdBy, LocalDateTime lastUpdate, String updatedBy,
-                      int customerID, String customerName, int contactID, String contactName, int userID, String username) {
+                      int customerID, String customerName, int userID, String username, int contactID, String contactName) {
       this.appointmentID = appointmentID;
       this.title = title;
       this.description = description;
@@ -60,10 +59,10 @@ public class Appointment {
       this.updatedBy = updatedBy;
       this.customerID = customerID;
       this.customerName = customerName;
-      this.contactID = contactID;
-      this.contactName = contactName;
       this.userID = userID;
       this.username = username;
+      this.contactID = contactID;
+      this.contactName = contactName;
 
 
    }
@@ -126,7 +125,6 @@ public class Appointment {
    public String getUsername(){return username;}
    public void setUserName(String username){this.username = username;}
 
-   public String getDivision(){return  division;}
 
    /**
     * @return Location as  a String

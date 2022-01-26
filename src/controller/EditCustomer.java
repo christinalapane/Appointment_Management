@@ -2,6 +2,7 @@ package controller;
 
 import DAO.CountriesDAO;
 import DAO.FirstLevelDAO;
+import DAO.UserDAO;
 import Database.DBConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -41,19 +42,14 @@ public class EditCustomer implements Initializable {
     @FXML private Button cancelButton;
     @FXML private Button saveButton;
 
-    /**
-     * adds countries and divisions to lists
-     */
+    /*** countries list*/
     private final ObservableList<Countries> countries = CountriesDAO.getAllCountries();
+    /*** division list*/
     private final ObservableList<FirstLevel> divisions = FirstLevelDAO.getAllDivision();
-    /**
-     * to add customer
-     */
+    /*** to add customer*/
     private Customer customer = null;
     private Consumer<Customer> onComplete;
-    /**
-     * selected customer to compare information
-     */
+    /*** selected customer to compare information*/
     private Customer selectedCustomer;
 
     /**
@@ -88,7 +84,7 @@ public class EditCustomer implements Initializable {
         }
 
     /**
-     *
+     * if pressed, clears and returns back to main screen
      * @param actionEvent returns to main screen
      * @throws IOException in case of I/O error
      */
@@ -132,9 +128,7 @@ public class EditCustomer implements Initializable {
         }
     }
 
-    /**
-     * compares countryID in divisions vs in country. Filters list based on that.
-     */
+    /***compares countryID in divisions vs in country. Filters list based on that.*/
     public void updateDivision() {
         int countryID = countryCombo.getSelectionModel().getSelectedItem().getCountryID();
         ObservableList<FirstLevel> filteredDivisions = FXCollections.observableArrayList();
@@ -177,9 +171,9 @@ public class EditCustomer implements Initializable {
             ps.setString(3, zip);
             ps.setString(4, phone);
             ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setString(6, LoginPage.getLoggedOnUser().getUsername());
+            ps.setString(6, UserDAO.getLoggedName());
             ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setString(8, LoginPage.getLoggedOnUser().getUsername());
+            ps.setString(8, UserDAO.getLoggedName());
             ps.setInt(9, divisionID);
             ps.setInt(10,id);
             ps.executeUpdate();
@@ -229,9 +223,7 @@ public class EditCustomer implements Initializable {
         }
     }
 
-    /**
-     * unused
-     */
+    /*** unused*/
     public void onStateCombo() {}
 
 }

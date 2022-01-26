@@ -1,7 +1,6 @@
 package DAO;
 
 import Database.DBConnection;
-import controller.LoginPage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Customer;
@@ -63,9 +62,9 @@ public class CustomerDAO {
             ps.setString(3, zip);
             ps.setString(4, phone);
             ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setString(6, LoginPage.getLoggedOnUser().getUsername());
+            ps.setString(6, UserDAO.getLoggedName());
             ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setString(8, LoginPage.getLoggedOnUser().getUsername());
+            ps.setString(8, UserDAO.getLoggedName());
             ps.setInt(9, divisionID);
 
             int n = ps.executeUpdate();

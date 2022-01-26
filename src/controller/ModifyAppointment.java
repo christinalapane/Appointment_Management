@@ -25,7 +25,7 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
+
 
 
 public class ModifyAppointment implements Initializable {
@@ -50,7 +50,7 @@ public class ModifyAppointment implements Initializable {
 
     private Appointment selectedAppointment;
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM:dd:yyyy hh:mm a");
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM:dd:yyyy hh:mm a");
     private final ObservableList<LocalTime> startTimes = FXCollections.observableArrayList();
     private final ObservableList<LocalTime> endTimes = FXCollections.observableArrayList();
     private final ObservableList<Appointment> appointments = AppointmentDAO.getAllAppointments();
@@ -74,6 +74,7 @@ public class ModifyAppointment implements Initializable {
         startCombo.setValue(selectedAppointment.getStartTime().toLocalTime());
         endCombo.setValue(selectedAppointment.getEndTime().toLocalTime());
         typeText.setText(selectedAppointment.getType());
+
 
         loadDates();
         loadComboBoxes();
@@ -111,22 +112,23 @@ public class ModifyAppointment implements Initializable {
         Users userID = userCombo.getValue();
         Contact contact = contactCombo.getValue();
         String date = String.valueOf(pickDate.getValue());
+        LocalDateTime startTotal = LocalDateTime.of(LocalDate.parse(date), start);
+        LocalDateTime endTotal = LocalDateTime.of(LocalDate.parse(date),end);
 
 
-        Consumer<Appointment> onComplete = result -> {
-            if (isConflict(result)) {
-                MainScreen.informationAlert("Information", "Unable to schedule appointment \n" +
-                        "Scheduling conflict \n Check appointments and try again");
-            }
-        };
-        if (location == null || customer == null || userID == null || type.isEmpty() || description.isEmpty() ||
+        if (AppointmentDAO.itExists(startTotal, endTotal)) {
+            MainScreen.informationAlert("Information", "Unable to schedule appointment \n" +
+                    "Scheduling conflict \n Check appointments and try again");
+        }
+        else if(location == null || customer == null || userID == null || type.isEmpty() || description.isEmpty() ||
                 title.isEmpty()) {
             emptyField();
         } else if (start.isAfter(end) || end.isBefore(start)) {
             timeAlert();
-        }else if(!title.isEmpty() || !description.isEmpty() || !type.isEmpty()) {
+        } else if (!title.isEmpty() || !description.isEmpty() || !type.isEmpty()) {
+
             modifyAppointment(title, description, location.getLocation(), type,
-                    LocalDateTime.of(LocalDate.parse(date), start), LocalDateTime.of(LocalDate.parse(date), end), customer.getCustomerID(), userID.getUserID(), contact.getContactID());
+                    startTotal, endTotal, customer.getCustomerID(), userID.getUserID(), contact.getContactID());
             confirmAlert();
             Stage stage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
             Parent scene = FXMLLoader.load(getClass().getResource("/view/MainScreen.fxml"));
@@ -152,7 +154,7 @@ public class ModifyAppointment implements Initializable {
      * @param contactID Contact_ID
      */
     void modifyAppointment(String title, String description, String location, String type, LocalDateTime start, LocalDateTime end, int customerID, int userID, int contactID) {
-        String sql = "UPDATE appointments SET Title=?, Description=?, Location=?, Type=?, Start=?, End=?, Create_Date=?, Created_By=?, Last_Update=?, Last_Updated_By=?, Customer_ID=?, Contact_ID=?, User_ID=? WHERE Appointment_ID=?";
+        String sql = "UPDATE appointments SET Title=?, Description=?, Location=?, Type=?, Start=?, End=?, Create_Date=?, Created_By=?, Last_Update=?, Last_Updated_By=?, Customer_ID=?, User_ID=?, Contact_ID=? WHERE Appointment_ID=?";
         int appointmentID = MainScreen.appointmentToModify().getAppointmentID();
         try {
             PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
@@ -163,9 +165,9 @@ public class ModifyAppointment implements Initializable {
             ps.setTimestamp(5, Timestamp.valueOf(start));
             ps.setTimestamp(6, Timestamp.valueOf(end));
             ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setString(8, LoginPage.getLoggedOnUser().getUsername());
+            ps.setString(8, UserDAO.getLoggedName());
             ps.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setString(10, LoginPage.getLoggedOnUser().getUsername());
+            ps.setString(10, UserDAO.getLoggedName());
             ps.setInt(11, customerID);
             ps.setInt(12, userID);
             ps.setInt(13, contactID);
@@ -344,23 +346,6 @@ public class ModifyAppointment implements Initializable {
         }
     }
 
-    /**
-     * lambda to filter through appointments with customerID to check for start and end times.
-     *  lambda finds any match between appointment being scheduled and customers with already scheduled appointments
-     * @param result the customerID that has an appointment
-     * @return if there are any appointments already scheduled at this time
-     */
-    private boolean isConflict(Appointment result) {
-        return appointments.stream()
-                .filter(appointment -> appointment.getCustomerID() == result.getCustomerID() && (
-                                appointment.getStartTime().toLocalDate().equals(result.getStartTime().toLocalDate()) ||
-                                        appointment.getEndTime().toLocalDate().equals(result.getEndTime().toLocalDate()))).anyMatch(
-                        appointment -> appointment.getStartTime().isEqual(result.getStartTime())
-                                || appointment.getEndTime().isEqual(result.getEndTime())
-                                || appointment.getStartTime().isBefore(result.getStartTime())
-                                || appointment.getEndTime().isBefore(result.getEndTime()));
-    }
-
 
     /**
      * time alert error
@@ -390,8 +375,8 @@ public class ModifyAppointment implements Initializable {
     private void confirmAlert(){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirm");
-        alert.setHeaderText("Confirm adding appointment");
-        alert.setContentText("Appointment has been added");
+        alert.setHeaderText("Confirm editing appointment");
+        alert.setContentText("Appointment has been edited");
         alert.showAndWait();
     }
 
@@ -406,13 +391,16 @@ public class ModifyAppointment implements Initializable {
         alert.showAndWait();
     }
 
-    /**
-     * unused
-     */
+    /*** unused*/
     public void onLocation() {}
+    /*** unused*/
     public void onStart() {}
+    /*** unused*/
     public void onEnd() {}
+    /*** unused*/
     public void onCustomer() {}
+    /*** unused*/
     public void onUser() {}
+    /*** unused*/
     public void onContact() {}
 }
