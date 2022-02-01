@@ -1,9 +1,7 @@
 package controller;
 
-import DAO.AppointmentDAO;
 import DAO.UserDAO;
 import Database.DBConnection;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,20 +12,17 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import model.Appointment;
-import model.Users;
 import resources.Logger;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.TimeZone;
 
 public class LoginPage implements Initializable {
     //labels
@@ -44,24 +39,26 @@ public class LoginPage implements Initializable {
     //textfields
     @FXML private PasswordField password;
     @FXML private TextField username;
+
+    private final static DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a");
     /**
      * declares for logged Users
      */
-    boolean yesApp = false;
-    boolean noApp;
+    static boolean yesApp = false;
 
 
     /**
      * initializes labels and buttons on login screen.
      *  references languages based on local location.
-     *
      */
     @Override
     public void initialize(URL location, ResourceBundle rb) {
         rb = ResourceBundle.getBundle("resources/Languages");
-        localArea.setText(Locale.getDefault().getDisplayCountry());
+         TimeZone zone = TimeZone.getDefault();
+         String name = zone.getDisplayName();
+         localArea.setText(Locale.getDefault().getDisplayCountry() + "\n" + name);
 
-                loginError.setVisible(false);
+        loginError.setVisible(false);
                 userLabel.setText(rb.getString("username"));
                 passwordLabel.setText(rb.getString("password"));
                 loginLabel.setText(rb.getString("login"));
@@ -96,6 +93,10 @@ public class LoginPage implements Initializable {
             Logger.auditLogin(username.getText(), success);
             if (success) {
                 fifteenMinutes();
+                if(!yesApp){
+                    MainScreen.informationAlert("Appointments","No appointments in the next 15 minutes" );
+
+                }
                 Stage stage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
                 Parent scene = FXMLLoader.load(getClass().getResource("/view/MainScreen.fxml"));
                 stage.setTitle("Main Screen");
@@ -122,48 +123,46 @@ public class LoginPage implements Initializable {
 
         }
 
-        private boolean nearAppointment(LocalDateTime start){
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime after15 = LocalDateTime.now().plusMinutes(15);
-            LocalDateTime before15 = LocalDateTime.now().plusMinutes(-15);
+
+    private static boolean nearAppointment(LocalDateTime start){
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime after15 = LocalDateTime.now().plusMinutes(15);
+        LocalDateTime before15 = LocalDateTime.now().plusMinutes(-15);
 
 
 
-            if(now.isBefore(after15) && now.isAfter(before15)){
-                return true;
-            }else{return  false;}
+        if(now.isBefore(after15) && now.isAfter(before15)){
+            return true;
+        }else{return  false;}
+    }
+
+    static void fifteenMinutes() throws SQLException {
+        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+        LocalDateTime fifteen = LocalDateTime.now(ZoneId.systemDefault()).plusMinutes(15);
+        int user = UserDAO.getLoggedOnUser();
+
+        String sql = "SELECT Appointment_ID, Start, End FROM Appointments WHERE Start BETWEEN ? AND ? AND User_ID = ?";
+        PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
+        ps.setTimestamp(1, Timestamp.valueOf(now));
+        ps.setTimestamp(2, Timestamp.valueOf(fifteen));
+        ps.setInt(3, user);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            if (nearAppointment(rs.getTimestamp("Start").toLocalDateTime())) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Appointment notice");
+                alert.setHeaderText("Appointment coming up");
+                alert.setHeaderText("You have an appointment in next 15 minutes \n" +
+                        "Appointment ID: " + rs.getInt("Appointment_ID") + " \n" +
+                        "Scheduled:  " + rs.getTimestamp("Start").toLocalDateTime().format(dateTimeFormat) + " - " + rs.getTimestamp("End").toLocalDateTime().format(dateTimeFormat));
+                alert.showAndWait();
+                yesApp = true;
+                break;
+            }
         }
-        private void fifteenMinutes() throws SQLException {
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime fifteen = LocalDateTime.now().plusMinutes(15);
-            int user = UserDAO.getLoggedOnUser();
 
-           String sql = "SELECT Appointment_ID, Start, End FROM Appointments WHERE Start BETWEEN ? AND ? AND User_ID = ?";
-           PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
-           ps.setTimestamp(1, Timestamp.valueOf(now));
-           ps.setTimestamp(2, Timestamp.valueOf(fifteen));
-           ps.setInt(3, user);
-           ResultSet rs = ps.executeQuery();
-           while(rs.next()){
-               if(nearAppointment(rs.getTimestamp("Start").toLocalDateTime())){
-                   Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                   alert.setTitle("Appointment notice");
-                   alert.setHeaderText("Appointment coming up");
-                   alert.setHeaderText("You have an appointment in next 15 minutes \n" +
-                           "Appointment ID: " + rs.getInt("Appointment_ID") + " \n" +
-                           "Scheduled:  "+ rs.getTimestamp("Start").toLocalDateTime() + " - " + rs.getTimestamp("End").toLocalDateTime());
-                   alert.showAndWait();
-                   yesApp = true;
-                   break;
-               }
-               if(nearAppointment(rs.getTimestamp("Start").toLocalDateTime()) == false){
-                   noApp = true;
-               }
-               }
-           if(noApp == true && yesApp == false){
-               MainScreen.informationAlert("Appointment Notices", "No appointments in next 15 mintues");
-           }
-           }
+    }
+
 
 
 

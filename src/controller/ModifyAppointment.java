@@ -20,26 +20,29 @@ import java.io.IOException;
 import java.net.URL;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 
 
 public class ModifyAppointment implements Initializable {
+
     //textfields//
     @FXML TextField typeText;
     @FXML private TextField appointmentID;
     @FXML private TextField titleText;
     @FXML private TextField descriptionText;
+    @FXML private TextField locationText;
     //combobox//
     @FXML private ComboBox<Customer> customerCombo;
     @FXML private ComboBox<Contact> contactCombo;
     @FXML private ComboBox<Users> userCombo;
     @FXML private DatePicker pickDate;
-    @FXML private ComboBox<Appointment> locationCombo;
     @FXML private ComboBox<LocalTime> startCombo;
     @FXML private ComboBox<LocalTime> endCombo;
     //labels//
@@ -57,6 +60,7 @@ public class ModifyAppointment implements Initializable {
     private final ObservableList<Contact> contacts = ContactsDAO.allContacts();
     private final ObservableList<Users> users = UserDAO.getAllUsers();
     private final ObservableList<Customer> customers = CustomerDAO.getAllCustomers();
+    private final ObservableList<FirstLevel> divisions = FirstLevelDAO.getAllDivision();
 
     public ModifyAppointment() throws Exception {}
     /**
@@ -70,11 +74,14 @@ public class ModifyAppointment implements Initializable {
         appointmentID.setText(String.valueOf(selectedAppointment.getAppointmentID()));
         titleText.setText(selectedAppointment.getTitle());
         descriptionText.setText(selectedAppointment.getDescription());
+        locationText.setText(selectedAppointment.getLocation());
         pickDate.setValue(selectedAppointment.getStartTime().toLocalDate());
         startCombo.setValue(selectedAppointment.getStartTime().toLocalTime());
         endCombo.setValue(selectedAppointment.getEndTime().toLocalTime());
         typeText.setText(selectedAppointment.getType());
 
+        String now = LocalDateTime.now().format(timeFormatter);
+        localZoneLabel.setText("Local time: " + now );
 
         loadDates();
         loadComboBoxes();
@@ -105,7 +112,7 @@ public class ModifyAppointment implements Initializable {
         Customer customer = customerCombo.getValue();
         String title = titleText.getText();
         String description = descriptionText.getText();
-        Appointment location = locationCombo.getValue();
+        String location = locationText.getText();
         String type = typeText.getText();
         LocalTime start = startCombo.getValue();
         LocalTime end = endCombo.getValue();
@@ -116,18 +123,15 @@ public class ModifyAppointment implements Initializable {
         LocalDateTime endTotal = LocalDateTime.of(LocalDate.parse(date),end);
 
 
-        if (AppointmentDAO.itExists(startTotal, endTotal)) {
-            MainScreen.informationAlert("Information", "Unable to schedule appointment \n" +
-                    "Scheduling conflict \n Check appointments and try again");
-        }
-        else if(location == null || customer == null || userID == null || type.isEmpty() || description.isEmpty() ||
-                title.isEmpty()) {
+        if(location == null || customer == null || userID == null || type.isEmpty() || description.isEmpty() ||
+                title.isEmpty() || description.isEmpty() || type.isEmpty()) {
             emptyField();
-        } else if (start.isAfter(end) || end.isBefore(start)) {
+        } else if (start.isAfter(end) || end.isBefore(start) || start.isBefore(LocalTime.now())) {
             timeAlert();
-        } else if (!title.isEmpty() || !description.isEmpty() || !type.isEmpty()) {
+        } else if (ifContactExist() && ifCustomerExist()) {
 
-            modifyAppointment(title, description, location.getLocation(), type,
+
+            AppointmentDAO.modifyAppointment(title, description, location, type,
                     startTotal, endTotal, customer.getCustomerID(), userID.getUserID(), contact.getContactID());
             confirmAlert();
             Stage stage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
@@ -141,43 +145,7 @@ public class ModifyAppointment implements Initializable {
         }
     }
 
-    /**
-     * Adds updated information into database
-     * @param title Title
-     * @param description Description
-     * @param location Location
-     * @param type Type
-     * @param start Start
-     * @param end End
-     * @param customerID Customer_ID
-     * @param userID User_ID
-     * @param contactID Contact_ID
-     */
-    void modifyAppointment(String title, String description, String location, String type, LocalDateTime start, LocalDateTime end, int customerID, int userID, int contactID) {
-        String sql = "UPDATE appointments SET Title=?, Description=?, Location=?, Type=?, Start=?, End=?, Create_Date=?, Created_By=?, Last_Update=?, Last_Updated_By=?, Customer_ID=?, User_ID=?, Contact_ID=? WHERE Appointment_ID=?";
-        int appointmentID = MainScreen.appointmentToModify().getAppointmentID();
-        try {
-            PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
-            ps.setString(1, title);
-            ps.setString(2, description);
-            ps.setString(3, location);
-            ps.setString(4, type);
-            ps.setTimestamp(5, Timestamp.valueOf(start));
-            ps.setTimestamp(6, Timestamp.valueOf(end));
-            ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setString(8, UserDAO.getLoggedName());
-            ps.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
-            ps.setString(10, UserDAO.getLoggedName());
-            ps.setInt(11, customerID);
-            ps.setInt(12, userID);
-            ps.setInt(13, contactID);
-            ps.setInt(14, appointmentID);
-            ps.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
     /**
      * loads business hours into start and end array at increments of 15 minutes
      */
@@ -225,6 +193,38 @@ public class ModifyAppointment implements Initializable {
     }
 
     /**
+     * loads all combo boxes with all lists, but sets current value to value of selected appointment
+     */
+    private void loadComboBoxes()  {
+        selectedAppointment = MainScreen.appointmentToModify();
+        for(Customer customers : customers){
+            if (customers.getCustomerID() != selectedAppointment.getCustomerID()) continue;
+            customerCombo.setValue(customers);
+        }
+            customerCombo.setItems(customers);
+
+
+
+        for(Contact contacts : contacts){
+            if(contacts.getContactID() != selectedAppointment.getContactID()) continue;
+                contactCombo.setValue(contacts);}
+                    contactCombo.setItems(contacts);
+
+        for(Users users : users){
+            if(users.getUserID() != selectedAppointment.getUserID()) continue;
+                userCombo.setValue(users);
+        }
+                     userCombo.setItems(users);
+
+        loadTimes();
+        startComboInitialize();
+        endComboInitialize();
+        startCombo.setItems(startTimes);
+        endCombo.setItems(endTimes);
+    }
+
+
+    /**
      * Sets startCombo at HH:mm format
      */
     private void startComboInitialize() {
@@ -251,7 +251,7 @@ public class ModifyAppointment implements Initializable {
             protected void updateItem(LocalTime item, boolean empty) {
                 super.updateItem(item, empty);
 
-                if (item == null || empty) {
+                if(item == null || empty) {
                     setText(null);
                 } else {
                     setText(item.format(timeFormatter));
@@ -259,10 +259,11 @@ public class ModifyAppointment implements Initializable {
             }
         });
     }
+
     /**
      * sets endCombo times in HH:mm format
      */
-    private void endComboInitialize() {
+    private void endComboInitialize () {
         endCombo.setItems(endTimes);
         endCombo.setCellFactory(new Callback<>() {
             @Override
@@ -286,7 +287,7 @@ public class ModifyAppointment implements Initializable {
             protected void updateItem(LocalTime item, boolean empty) {
                 super.updateItem(item, empty);
 
-                if (item == null || empty) {
+                if(item == null || empty) {
                     setText(null);
                 } else {
                     setText(item.format(timeFormatter));
@@ -294,56 +295,111 @@ public class ModifyAppointment implements Initializable {
             }
         });
     }
-
     /**
-     * loads all combo boxes with all lists, but sets current value to value of selected appointment
+     * Goes through appointments and finds if selected contact has an appointment scheduled already
+     * @return if contact has an appointment
+     * @throws SQLException in case of SQL error
      */
-    private void loadComboBoxes()  {
-        selectedAppointment = MainScreen.appointmentToModify();
-        for(Customer customers : customers){
-            if (customers.getCustomerID() != selectedAppointment.getCustomerID()) continue;
-            customerCombo.setValue(customers);
+    public boolean ifContactExist() throws SQLException {
+        String contact = "";
+        String scheduledIn = "no";
+        String scheduledOut = "no";
+        LocalTime start = startCombo.getValue();
+        LocalTime end = endCombo.getValue();
+        String date = String.valueOf(pickDate.getValue());
+        LocalDateTime startTotal = LocalDateTime.of(LocalDate.parse(date), start);
+        LocalDateTime endTotal = LocalDateTime.of(LocalDate.parse(date),end);
+
+        // Getting Contact ID
+        PreparedStatement ps2 = DBConnection.getConnection().prepareStatement("SELECT * "
+                + "FROM contacts "
+                + "WHERE Contact_Name = ?");
+        ps2.setString(1, contactCombo.getValue().getName());
+        ResultSet result1 = ps2.executeQuery();
+        while (result1.next()) {
+            contact = result1.getString("Contact_ID");
         }
-            customerCombo.setItems(customers);
 
-        for(Appointment appointment : appointments){
-            if(appointment.getLocation() != selectedAppointment.getLocation()) continue;
-            locationCombo.setValue(appointment);
-        } locationCombo.setItems(appointments);
+        // all appointments for that one contact ID and compare it
+        PreparedStatement ps3 = DBConnection.getConnection().prepareStatement("SELECT * "
+                + "FROM appointments "
+                + "WHERE (? BETWEEN Start AND End AND Contact_ID = ?) OR (Start BETWEEN ? AND ? AND Contact_ID = ?)");
+        ps3.setTimestamp(1, Timestamp.valueOf(startTotal));
+        ps3.setString(2, contact);
+        ps3.setTimestamp(3, Timestamp.valueOf(startTotal));
+        ps3.setTimestamp(4, Timestamp.valueOf(endTotal));
+        ps3.setString(5, contact);
+        ResultSet result = ps3.executeQuery();
+        while (result.next()) {
+            scheduledIn = result.getString("Start");
+            scheduledOut = result.getString("End");
 
-
-        for(Contact contacts : contacts){
-            if(contacts.getContactID() != selectedAppointment.getContactID()) continue;
-                contactCombo.setValue(contacts);}
-                    contactCombo.setItems(contacts);
-
-        for(Users users : users){
-            if(users.getUserID() != selectedAppointment.getUserID()) continue;
-                userCombo.setValue(users);
         }
-                     userCombo.setItems(users);
 
-        loadTimes();
-        setNewAppointmentTime();
-        endComboInitialize();
-        startComboInitialize();
-        startCombo.setItems(startTimes);
-        endCombo.setItems(endTimes);
+        if (scheduledIn != "no") {
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Scheduling error");
+            alert.setHeaderText("This appointment can not happen");
+            alert.setContentText( contactCombo.getValue() + " already has an appointment  " +
+                    "from " + AppointmentDAO.toLocal(scheduledIn) + " to " + AppointmentDAO.toLocal(scheduledOut)
+                    + "\nPlease select another time or date.");
+            Optional<ButtonType> result9 = alert.showAndWait();
+            return false;
+        }
+        return true;
     }
 
     /**
-     * Gets current time and sets lists to next available times at 15 min increments.
+     * Searches through appointments to find if customer has an appointment
+     * @return if customer has an appointment scheduled
+     * @throws SQLException in case of SQL error
      */
-    private void setNewAppointmentTime() {
-        LocalTime current = LocalTime.now();
-        startCombo.getSelectionModel().select(0);
-        endCombo.getSelectionModel().select(1);
-        for (LocalTime time : startTimes) {
-            if (current.isBefore(time)) {
-                startCombo.getSelectionModel().select(time);
-                endCombo.getSelectionModel().select(endTimes.indexOf(time.plusMinutes(15)));
-                break;}
+    public boolean ifCustomerExist() throws SQLException {
+        String scheduledIn = "no";
+        String scheduledOut = "no";
+        LocalTime start = startCombo.getValue();
+        LocalTime end = endCombo.getValue();
+        String date = String.valueOf(pickDate.getValue());
+        LocalDateTime startTotal = LocalDateTime.of(LocalDate.parse(date), start);
+        LocalDateTime endTotal = LocalDateTime.of(LocalDate.parse(date),end);
+
+
+        PreparedStatement ps4 = DBConnection.getConnection().prepareStatement("SELECT *" +
+                "FROM customers WHERE Customer_Name = ?");
+        ps4.setString(1, customerCombo.getValue().getCustomerName());
+        String customer = " ";
+        ResultSet result3 = ps4.executeQuery();
+        while(result3.next()) {
+            customer = (result3.getString("Customer_ID"));
         }
+        // Now we grab all appointments for that one contact ID and compare it
+        PreparedStatement ps3 = DBConnection.getConnection().prepareStatement("SELECT * "
+                + "FROM appointments "
+                + "WHERE (? BETWEEN Start AND End AND Customer_ID = ?) OR (Start BETWEEN ? AND ? AND Customer_ID = ?)");
+        ps3.setTimestamp(1, Timestamp.valueOf(startTotal));
+        ps3.setString(2, customer);
+        ps3.setTimestamp(3, Timestamp.valueOf(startTotal));
+        ps3.setTimestamp(4, Timestamp.valueOf(endTotal));
+        ps3.setString(5, customer);
+        ResultSet result = ps3.executeQuery();
+        while (result.next()) {
+            scheduledIn = result.getString("Start");
+            scheduledOut = result.getString("End");
+        }
+
+        if (scheduledIn != "no") {
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Scheduling error");
+            alert.setHeaderText("This appointment can not happen");
+            alert.setContentText( customerCombo.getValue() + " already has an appointment  " +
+                    "from " + AppointmentDAO.toLocal(scheduledIn) + " to " + AppointmentDAO.toLocal(scheduledOut)
+                    + "\nPlease select another time or date.");
+            Optional<ButtonType> result9 = alert.showAndWait();
+            return false;
+        }
+        return true;
     }
 
 
@@ -391,8 +447,6 @@ public class ModifyAppointment implements Initializable {
         alert.showAndWait();
     }
 
-    /*** unused*/
-    public void onLocation() {}
     /*** unused*/
     public void onStart() {}
     /*** unused*/

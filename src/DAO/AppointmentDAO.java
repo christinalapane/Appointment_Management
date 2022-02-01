@@ -1,12 +1,17 @@
 package DAO;
 
 import Database.DBConnection;
+import controller.MainScreen;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Appointment;
 import model.Reports;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static DAO.UserDAO.*;
 
 
@@ -144,6 +149,7 @@ public class AppointmentDAO {
 
     /**
      * deletes an appointment based off appointment ID
+     *
      * @param id Appointment_ID
      * @return deletes a single appointment
      */
@@ -161,25 +167,25 @@ public class AppointmentDAO {
     }
 
     /**
-     * @param now start date
+     * @param now   start date
      * @param later end date
      * @return a filtered appointment list based off entered values
      * @throws SQLException in case of SQL error
      */
     public static ObservableList<Appointment> getDateFiltered(LocalDateTime now, LocalDateTime later) throws SQLException {
         ObservableList<Appointment> filtered = FXCollections.observableArrayList();
-       String sql= "SELECT appointments.Appointment_ID, appointments.Title, appointments.Description, appointments.Location, appointments.Type,\n" +
-               "appointments.Start, appointments.End, appointments.Create_Date, appointments.Created_By, \n" +
-               "appointments.Last_Update, appointments.Last_Updated_By, appointments.Contact_ID, appointments.Customer_ID, appointments.User_ID, contacts.Contact_Name, customers.Customer_Name, users.User_Name\n" +
-               "FROM appointments, contacts, customers, users \n" +
-               "WHERE appointments.Contact_ID = contacts.Contact_ID \n" +
-               "and appointments.Customer_ID = customers.Customer_ID\n" +
-               "and appointments.User_ID = users.User_ID  and Start between ? AND ?";
-       PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
-       ps.setTimestamp(1, Timestamp.valueOf(now));
-       ps.setTimestamp(2, Timestamp.valueOf(later));
-       ResultSet result = ps.executeQuery();
-       Appointment appointmentResult;
+        String sql = "SELECT appointments.Appointment_ID, appointments.Title, appointments.Description, appointments.Location, appointments.Type,\n" +
+                "appointments.Start, appointments.End, appointments.Create_Date, appointments.Created_By, \n" +
+                "appointments.Last_Update, appointments.Last_Updated_By, appointments.Contact_ID, appointments.Customer_ID, appointments.User_ID, contacts.Contact_Name, customers.Customer_Name, users.User_Name\n" +
+                "FROM appointments, contacts, customers, users \n" +
+                "WHERE appointments.Contact_ID = contacts.Contact_ID \n" +
+                "and appointments.Customer_ID = customers.Customer_ID\n" +
+                "and appointments.User_ID = users.User_ID  and Start between ? AND ?";
+        PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
+        ps.setTimestamp(1, Timestamp.valueOf(now));
+        ps.setTimestamp(2, Timestamp.valueOf(later));
+        ResultSet result = ps.executeQuery();
+        Appointment appointmentResult;
 
         while (result.next()) {
             int appointmentID = result.getInt("Appointment_ID");
@@ -207,24 +213,58 @@ public class AppointmentDAO {
     }
 
     /**
-     *
-     * @param start new start time of appointment
-     * @param end new end time of appointment
-     * @return if there is overlap of new times vs scheduled times
-     * @throws Exception in case of SQl error
+     * * Adds updated information into database
+     * @param title Title
+     * @param description Description
+     * @param location Location
+     * @param type Type
+     * @param start Start
+     * @param end End
+     * @param customerID Customer_ID
+     * @param userID User_ID
+     * @param contactID Contact_ID
      */
-    public static boolean itExists(LocalDateTime start, LocalDateTime end) throws Exception {
-        boolean returnValue = false;
-        ObservableList<Appointment> allAppointments = getAllAppointments();
-        for(Appointment a: allAppointments){
-            LocalDateTime startApt = a.getStartTime();
-            LocalDateTime endApt = a.getEndTime();
-            if(start.isAfter(startApt) && start.isBefore(endApt)|| end.isAfter(startApt) && end.isBefore(endApt)){
-                returnValue = true;
-            }
+    public static void modifyAppointment(String title, String description, String location, String type, LocalDateTime start, LocalDateTime end, int customerID, int userID, int contactID) {
+        String sql = "UPDATE appointments SET Title=?, Description=?, Location=?, Type=?, Start=?, End=?, Create_Date=?, Created_By=?, Last_Update=?, Last_Updated_By=?, Customer_ID=?, User_ID=?, Contact_ID=? WHERE Appointment_ID=?";
+        int appointmentID = MainScreen.appointmentToModify().getAppointmentID();
+        try {
+            PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
+            ps.setString(1, title);
+            ps.setString(2, description);
+            ps.setString(3, location);
+            ps.setString(4, type);
+            ps.setTimestamp(5, Timestamp.valueOf(start));
+            ps.setTimestamp(6, Timestamp.valueOf(end));
+            ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setString(8, UserDAO.getLoggedName());
+            ps.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setString(10, UserDAO.getLoggedName());
+            ps.setInt(11, customerID);
+            ps.setInt(12, userID);
+            ps.setInt(13, contactID);
+            ps.setInt(14, appointmentID);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return returnValue;
     }
+
+    /**
+     * changes dates to represent local time
+     * @param dateTime input of dateTime string
+     * @return string of local time zone dateTime
+     */
+    public static String toLocal(String dateTime){
+        Timestamp timestamp = Timestamp.valueOf(dateTime);
+        LocalDateTime local = timestamp.toLocalDateTime();
+        ZonedDateTime zoned = local.atZone(ZoneId.of("UTC"));
+        ZonedDateTime zonedLocal = zoned.withZoneSameLocal(ZoneId.of(ZoneId.systemDefault().toString()));
+        LocalDateTime localDate = zonedLocal.toLocalDateTime();
+        String finish = localDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a"));
+        return  finish;
+    }
+
 
 
 }

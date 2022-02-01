@@ -1,5 +1,6 @@
 package model;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * All information needed for Appointment table
@@ -23,7 +24,7 @@ public class Appointment {
    private  int userID;
    private  String username;
 
-
+DateTimeFormatter format = DateTimeFormatter.ofPattern("hh:mm a");
    /**
     *
     * @param appointmentID Appointment_ID
@@ -63,6 +64,25 @@ public class Appointment {
       this.username = username;
       this.contactID = contactID;
       this.contactName = contactName;
+
+
+   }
+
+   public Appointment(int appointmentID, String title, String description, String location, String type, LocalDateTime start, LocalDateTime end, LocalDateTime created, String createdBy, LocalDateTime updated, String updatedBy, int customerID, int userID, int contactID) {
+   this.appointmentID=appointmentID;
+   this.title = title;
+   this.description = description;
+   this.location = location;
+   this.type = type;
+   this.startTime = start;
+   this.endTime = end;
+   this.created = created;
+   this.createdBy = createdBy;
+   this.lastUpdate = updated;
+   this.updatedBy = updatedBy;
+   this.customerID = customerID;
+   this.contactID = contactID;
+   this.userID = userID;
 
 
    }

@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="786.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainScreen">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="786.0" prefWidth="1148.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainScreen">
    <children>
-      <Button fx:id="exit" layoutX="831.0" layoutY="739.0" mnemonicParsing="false" onAction="#onExit" prefHeight="26.0" prefWidth="54.0" text="Exit" />
+      <Button fx:id="exit" layoutX="1052.0" layoutY="733.0" mnemonicParsing="false" onAction="#onExit" prefHeight="26.0" prefWidth="54.0" text="Exit" />
       <Label fx:id="appointmentLabel" layoutX="24.0" layoutY="14.0" prefHeight="29.0" prefWidth="238.0">
          <font>
             <Font size="18.0" />
@@ -23,27 +23,27 @@
       <Button fx:id="deleteAppointment" layoutX="297.0" layoutY="707.0" mnemonicParsing="false" onAction="#onDeleteAppointment" prefHeight="26.0" prefWidth="131.0" text="Delete Appointment" />
       <Button fx:id="updateAppointment" layoutX="156.0" layoutY="707.0" mnemonicParsing="false" onAction="#onUpdateAppointment" prefHeight="26.0" prefWidth="131.0" text="Edit Appointment" />
       <Button fx:id="addAppointment" layoutX="23.0" layoutY="707.0" mnemonicParsing="false" onAction="#onAddAppointment" prefHeight="26.0" prefWidth="124.0" text="Add Appointment" />
-      <TableView fx:id="customerTable" layoutX="24.0" layoutY="86.0" prefHeight="244.0" prefWidth="903.0">
+      <TableView fx:id="customerTable" layoutX="24.0" layoutY="86.0" prefHeight="244.0" prefWidth="944.0">
         <columns>
           <TableColumn fx:id="customerIDCol" prefWidth="83.0" text="Customer ID" />
           <TableColumn fx:id="customerNameCol" prefWidth="195.0" text="Customer Name" />
-            <TableColumn fx:id="addressCol" prefWidth="202.0" text="Address " />
-            <TableColumn fx:id="postalCol" minWidth="0.0" prefWidth="110.0" text="Postal Code" />
-            <TableColumn fx:id="countryCol" prefWidth="143.0" text="Country" />
-            <TableColumn fx:id="phoneCol" prefWidth="176.0" text="Phone Number" />
+            <TableColumn fx:id="addressCol" prefWidth="214.0" text="Address " />
+            <TableColumn fx:id="postalCol" minWidth="0.0" prefWidth="126.0" text="Postal Code" />
+            <TableColumn fx:id="countryCol" prefWidth="148.0" text="Country" />
+            <TableColumn fx:id="phoneCol" prefWidth="177.0" text="Phone Number" />
         </columns>
       </TableView>
-      <TableView fx:id="appointmentTable" layoutX="24.0" layoutY="444.0" prefHeight="244.0" prefWidth="903.0">
+      <TableView fx:id="appointmentTable" layoutX="24.0" layoutY="444.0" prefHeight="244.0" prefWidth="1090.0">
          <columns>
             <TableColumn fx:id="appointmentIDCol" prefWidth="97.0" text="Appointment ID" />
             <TableColumn fx:id="customerAppointmentCol" prefWidth="88.0" text="Customer ID" />
             <TableColumn fx:id="titleCol" prefWidth="97.0" text="Title" />
-            <TableColumn fx:id="typeCol" prefWidth="111.0" text="Type" />
-            <TableColumn fx:id="descriptionCol" prefWidth="96.0" text="Description" />
+            <TableColumn fx:id="typeCol" prefWidth="122.0" text="Type" />
+            <TableColumn fx:id="descriptionCol" prefWidth="85.0" text="Description" />
             <TableColumn fx:id="contactCol" prefWidth="95.0" text="Contact" />
             <TableColumn fx:id="locationCol" prefWidth="106.0" text="Location" />
-            <TableColumn fx:id="startCol" prefWidth="103.0" text="Start" />
-            <TableColumn fx:id="endCol" prefWidth="115.0" text="End" />
+            <TableColumn fx:id="startCol" prefWidth="206.0" text="Start" />
+            <TableColumn fx:id="endCol" prefWidth="193.0" text="End" />
          </columns>
       </TableView>
       <Label layoutX="38.0" layoutY="61.0" text="View By :" />
@@ -58,7 +58,7 @@
             <Font size="18.0" />
          </font>
       </Label>
-      <Button fx:id="reportsButton" layoutX="792.0" layoutY="48.0" mnemonicParsing="false" onAction="#onReports" prefHeight="26.0" prefWidth="131.0" text="Reports" />
+      <Button fx:id="reportsButton" layoutX="975.0" layoutY="44.0" mnemonicParsing="false" onAction="#onReports" prefHeight="26.0" prefWidth="131.0" text="Reports" />
       <Label fx:id="dateLabel" layoutX="358.0" layoutY="47.0" prefHeight="29.0" prefWidth="238.0">
          <font>
             <Font size="18.0" />

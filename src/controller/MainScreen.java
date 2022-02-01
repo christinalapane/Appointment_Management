@@ -2,6 +2,8 @@ package controller;
 
 import DAO.AppointmentDAO;
 import DAO.CustomerDAO;
+import DAO.UserDAO;
+import Database.DBConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -13,10 +15,16 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import model.Appointment;
 import model.Customer;
+
 import java.io.IOException;
 import java.net.URL;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -68,8 +76,10 @@ public class MainScreen implements Initializable {
     private static Customer selectedCustomer;
     private static Appointment selectedAppointment;
     private final static DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    private final static DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a");
     private final ObservableList<Customer> customers = FXCollections.observableArrayList();
     private final ObservableList<Appointment> appointments = FXCollections.observableArrayList();
+
 
 
 
@@ -114,13 +124,47 @@ public class MainScreen implements Initializable {
         titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
         locationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
-        startCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
-        endCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
         contactCol.setCellValueFactory(new PropertyValueFactory<>("contactName"));
         customerAppointmentCol.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
-    }
+        startCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+        startCol.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointment, LocalDateTime> call(TableColumn<Appointment, LocalDateTime> appointmentLocalDateTimeTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean empty) {
+                        super.updateItem(item, empty);
 
+                        if (empty) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateTimeFormat));
+                        }
+                    }
+                };
+            }
+        });
+        endCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+        endCol.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointment, LocalDateTime> call(TableColumn<Appointment, LocalDateTime> appointmentLocalDateTimeTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        if (empty) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateTimeFormat));
+                        }
+                    }
+                };
+            }
+        });
+
+    }
     /**
      * loads variables into columns
      * @throws Exception in case of SQL error
@@ -327,7 +371,7 @@ public class MainScreen implements Initializable {
     void onMonthly() throws Exception {
         String now = LocalDateTime.now().format(dateFormat);
         String month = LocalDateTime.now().plusMonths(1).format(dateFormat);
-        appointmentLabel.setText(now + " to "+ month);
+        appointmentLabel.setText(now + " to " + month);
 
         ObservableList<Appointment> filtered = FXCollections.observableArrayList();
         LocalDateTime nowDate = LocalDateTime.now();
@@ -338,13 +382,45 @@ public class MainScreen implements Initializable {
         titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
         locationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
-        startCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
-        endCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
         contactCol.setCellValueFactory(new PropertyValueFactory<>("contactName"));
         customerAppointmentCol.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        startCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+        startCol.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointment, LocalDateTime> call(TableColumn<Appointment, LocalDateTime> appointmentLocalDateTimeTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean empty) {
+                        super.updateItem(item, empty);
 
+                        if (empty) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateTimeFormat));
+                        }
+                    }
+                };
+            }
+        });
+        endCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+        endCol.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointment, LocalDateTime> call(TableColumn<Appointment, LocalDateTime> appointmentLocalDateTimeTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean empty) {
+                        super.updateItem(item, empty);
 
+                        if (empty) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateTimeFormat));
+                        }
+                    }
+                };
+            }
+        });
     }
 
 
@@ -366,12 +442,51 @@ public class MainScreen implements Initializable {
         titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
         locationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
-        startCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
-        endCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
         contactCol.setCellValueFactory(new PropertyValueFactory<>("contactName"));
         customerAppointmentCol.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        startCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+        startCol.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointment, LocalDateTime> call(TableColumn<Appointment, LocalDateTime> appointmentLocalDateTimeTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        if (empty) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateTimeFormat));
+                        }
+                    }
+                };
+            }
+        });
+        endCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+        endCol.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<Appointment, LocalDateTime> call(TableColumn<Appointment, LocalDateTime> appointmentLocalDateTimeTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    protected void updateItem(LocalDateTime item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        if (empty) {
+                            setText(null);
+                        } else {
+                            setText(item.atZone(ZoneId.systemDefault()).format(dateTimeFormat));
+                        }
+                    }
+                };
+            }
+        });
     }
+
+
+
+
+
 
 
 
@@ -382,6 +497,8 @@ public class MainScreen implements Initializable {
     @FXML void onClear(ActionEvent actionEvent)  {
         customerLabel.setText(" ");
         appointmentLabel.setText(" ");
+        monthlyButton.setSelected(false);
+        weeklyButton.setSelected(false);
         appointmentTable.setItems(appointments);
     }
 

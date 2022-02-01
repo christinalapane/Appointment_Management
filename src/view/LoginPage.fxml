@@ -28,7 +28,7 @@
             <Font size="18.0" />
          </font>
       </Label>
-      <Label fx:id="localArea" layoutX="14.0" layoutY="352.0" prefHeight="26.0" prefWidth="160.0" />
-      <Label fx:id="loginError" layoutX="16.0" layoutY="267.0" prefHeight="52.0" prefWidth="236.0" textFill="#dd1212" />
+      <Label fx:id="localArea" layoutX="21.0" layoutY="267.0" prefHeight="67.0" prefWidth="354.0" />
+      <Label fx:id="loginError" layoutX="167.0" layoutY="30.0" prefHeight="83.0" prefWidth="236.0" textFill="#dd1212" />
    </children>
 </AnchorPane>

@@ -30,7 +30,6 @@
       <Button fx:id="cancelButton" layoutX="421.0" layoutY="499.0" mnemonicParsing="false" onAction="#onCancel" prefHeight="26.0" prefWidth="56.0" text="Cancel" />
       <Button fx:id="saveButton" layoutX="354.0" layoutY="499.0" mnemonicParsing="false" onAction="#onSave" prefHeight="26.0" prefWidth="56.0" text="Save" />
       <DatePicker fx:id="pickDate" layoutX="138.0" layoutY="372.0" prefHeight="26.0" prefWidth="160.0" />
-      <ComboBox fx:id="locationCombo" layoutX="138.0" layoutY="243.0" onAction="#onLocation" prefHeight="26.0" prefWidth="160.0" />
       <ComboBox fx:id="startCombo" layoutX="138.0" layoutY="414.0" onAction="#onStart" prefHeight="26.0" prefWidth="160.0" />
       <ComboBox fx:id="endCombo" layoutX="140.0" layoutY="452.0" onAction="#onEnd" prefHeight="26.0" prefWidth="160.0" />
       <ComboBox fx:id="contactCombo" layoutX="138.0" layoutY="286.0" onAction="#onContact" prefHeight="26.0" prefWidth="160.0" />
@@ -40,5 +39,6 @@
       <ComboBox fx:id="userCombo" layoutX="399.0" layoutY="78.0" onAction="#onUser" prefHeight="26.0" prefWidth="97.0" />
       <Label layoutX="346.0" layoutY="83.0" text="User ID" />
       <TextField fx:id="typeText" layoutX="138.0" layoutY="330.0" />
+      <TextField fx:id="locationText" layoutX="138.0" layoutY="243.0" />
    </children>
 </AnchorPane>
